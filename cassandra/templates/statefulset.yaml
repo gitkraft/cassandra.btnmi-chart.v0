@@ -111,6 +111,8 @@ spec:
         - name: CASSANDRA_STARTUP_CQL
           value: {{ .Values.startupCQL }}
         {{- end }}
+        - name: CASSANDRA_ENABLE_RPC
+          value: {{ .Values.cluster.enableRPC }}
 {{- if .Values.livenessProbe.enabled }}
         livenessProbe:
           exec:
@@ -140,8 +142,10 @@ spec:
           containerPort: 7199
         - name: cql
           containerPort: 9042
+{{- if .Values.cluster.enableRPC }}
         - name: thrift
           containerPort: 9160
+{{- end }}
         volumeMounts:
         - name: data
           mountPath: /bitnami/cassandra
