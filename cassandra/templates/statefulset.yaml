@@ -25,6 +25,7 @@ spec:
       labels:
         app: {{ template "cassandra.name" . }}
         release: {{ .Release.Name }}
+        chart: {{ template "cassandra.chart" . }}
 {{- if .Values.podLabels }}
 {{ toYaml .Values.podLabels | indent 8 }}
 {{- end }}
@@ -64,9 +65,11 @@ spec:
               if [[ $HOSTNAME =~ (.*)-0$ ]]; then
                 echo "Setting node as password seeder"
                 export CASSANDRA_PASSWORD_SEEDER=yes
+              else 
+                # Only node 0 will execute the startup initdb scripts
+                export CASSANDRA_IGNORE_INITDB_SCRIPTS=1
               fi
               /app-entrypoint.sh /run.sh
-
         image: {{ template "cassandra.image" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
         resources:
@@ -103,7 +106,7 @@ spec:
             secretKeyRef:
               name: {{ .Values.tlsEncryptionSecretName }}
               key: truststore-password
-        - name: CASSANDRA_KEYSTORE_PASSWARD
+        - name: CASSANDRA_KEYSTORE_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Values.tlsEncryptionSecretName }}
@@ -124,10 +127,6 @@ spec:
         {{- if .Values.jvm.extraOpts }}
         - name: JVM_EXTRA_OPTS
           value: {{ .Values.jvm.extraOpts | quote }}
-        {{- end }}
-        {{- if .Values.startupCQL }}
-        - name: CASSANDRA_STARTUP_CQL
-          value: {{ .Values.startupCQL | quote }}
         {{- end }}
         - name: CASSANDRA_ENABLE_RPC
           value: {{ .Values.cluster.enableRPC | quote }}
@@ -177,6 +176,14 @@ spec:
         - name: encryption-secrets
           mountPath: /bitnami/cassandra/secrets
 {{- end }}
+      {{- if or (.Files.Glob "files/docker-entrypoint-initdb.d/*") (.Values.initDBConfigMap) }}
+        - name: init-db
+          mountPath: /docker-entrypoint-initdb.d
+      {{- end }}
+      {{ if or (.Files.Glob "files/conf/*") .Values.existingConfiguration }}
+        - name: configurations
+          mountPath: /bitnami/cassandra/conf
+      {{- end }}
       {{- if .Values.image.pullSecrets }}
       imagePullSecrets:
         - name: {{ .Values.image.pullSecrets }}
@@ -215,6 +222,16 @@ spec:
               path: keystore
             - key: truststore
               path: truststore
+{{- end }}
+{{- if or (.Files.Glob "files/conf/*") .Values.existingConfiguration }}
+      - name: configurations
+        configMap:
+          name: {{ template "cassandra.configurationCM" . }}
+{{- end }}
+{{- if or (.Files.Glob "files/docker-entrypoint-initdb.d/*") (.Values.initDBConfigMap) }}
+      - name: init-db
+        configMap:
+          name: {{ template "cassandra.initDbCM" . }}
 {{- end }}
 {{- if not .Values.persistence.enabled }}
       - name: data
