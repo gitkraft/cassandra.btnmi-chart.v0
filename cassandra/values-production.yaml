@@ -21,7 +21,7 @@ image:
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
   ##
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -101,10 +101,10 @@ cluster:
   replicaCount: 3
   seedCount: 2
   numTokens: 256
-  endpointSnitch: SimpleSnitch
   datacenter: dc1
   rack: rack1
   enableRPC: true
+  endpointSnitch: SimpleSnitch
   minimumAvailable: 2
   ## Encryption values. NOTE: They require tlsEncryptionSecretName
   internodeEncryption: none
