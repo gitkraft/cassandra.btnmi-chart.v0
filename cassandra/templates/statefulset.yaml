@@ -66,10 +66,10 @@ spec:
         command: ["chown", "-R", "{{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.fsGroup }}", "/bitnami/cassandra"]
         securityContext:
           runAsUser: 0
-        resources: {{ toYaml .Values.volumePermissions.resources | nindent 10 -}}
+        resources: {{ toYaml .Values.volumePermissions.resources | nindent 10 }}
         volumeMounts:
         - name: data
-          mountPath: "/bitnami/cassandra"
+          mountPath: /bitnami/cassandra
       {{- end }}
       containers:
       - name: cassandra
@@ -88,7 +88,7 @@ spec:
               /app-entrypoint.sh /run.sh
         image: {{ template "cassandra.image" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
-        resources: {{ toYaml .Values.resources | nindent 10 -}}
+        resources: {{ toYaml .Values.resources | nindent 10 }}
         env:
         - name: CASSANDRA_CLUSTER_NAME
           value: {{ .Values.cluster.name }}
