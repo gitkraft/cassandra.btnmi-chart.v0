@@ -46,7 +46,7 @@ volumePermissions:
   image:
     registry: docker.io
     repository: bitnami/minideb
-    tag: latest
+    tag: buster
     pullPolicy: Always
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -213,6 +213,12 @@ affinity: {}
 ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 ##
 tolerations: []
+
+##
+## Container entrypoint and cmd (useful for using different images)
+##
+entrypoint: "/app-entrypoint.sh"
+cmd: "/run.sh"
 
 ## Network policies
 ## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
